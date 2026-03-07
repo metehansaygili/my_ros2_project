@@ -1,0 +1,56 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${workspaceFolder}/.vscode/browse.vc.db",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/metehan/ros_2_ws/install/my_robot_interfaces/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/metehan/my_robotics_project/src/gae_sim/parkour_pkg/include/**",
+        "/home/metehan/my_robotics_project/src/gae_sim/simulation/gae_sim/gae_sim_gazebo/include/**",
+        "/home/metehan/my_robotics_project/src/gae_sim/simulation/gae_sim/velodyne_simulator/velodyne_gazebo_plugins/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/autoware_lanelet2_extension/autoware_lanelet2_extension/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/common/autoware_ad_api_specs/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/common/autoware_motion_utils/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/common/autoware_point_types/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/common/autoware_universe_utils/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/common/autoware_utils/autoware_utils/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/common/component_interface_specs/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/common/component_interface_utils/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/common/geography_utils/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/common/interpolation/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/common/kalman_filter/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/eagleye/eagleye_core/coordinate/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/eagleye/eagleye_core/navigation/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/eagleye/eagleye_util/fix2kml/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/eagleye/eagleye_util/gnss_converter/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/ekf_localizer/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/gnss_compass_ros/gnss_compass/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/gnss_poser/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/gyro_odometer/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/llh_converter/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/localization_util/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/map/map_height_fitter/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/map/map_loader/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/map/map_projection_loader/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/map/map_tf_generator/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/msgs/tier4_autoware_msgs/tier4_auto_msgs_converter/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/rtklib_ros_bridge/rtklib_bridge/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/sensing/pointcloud_preprocessor/include/**",
+        "/home/metehan/my_robotics_project/src/multi_sensor_fusion_localization/src/sensing/tier4_pcl_extensions/include/**",
+        "/home/metehan/my_robotics_project/src/perception-lidar/travel_ground_filter/include/**",
+        "/home/metehan/my_robotics_project/src/perception-lidar/travel_object_clustering/include/**",
+        "/home/metehan/my_robotics_project/src/planner/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ros2",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++17"
+    }
+  ],
+  "version": 4
+}

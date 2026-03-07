@@ -1,0 +1,19 @@
+# ROS2 Derleme Dosyaları (Kesinlikle yüklenmemeli)
+build/
+install/
+log/
+
+# VS Code Veritabanı ve Ayarları
+.vscode/*.db
+.vscode/*.db-shm
+.vscode/*.db-wal
+.vscode/ipch/
+
+# Python Önbelleği
+__pycache__/
+*.pyc
+
+# Diğer Büyük Dosyalar
+*.o
+*.so
+*.a

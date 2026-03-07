@@ -1,0 +1,2 @@
+train7: normal sim yolundan 60 artı engellerin olduğu ama engellerin poligona dahil edilmediği
+train10: normal sim yolundan 60 artı engellerin olduğu ama engellerin poligona dahil edildiği

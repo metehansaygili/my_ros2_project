@@ -1,0 +1,12 @@
+# Scriptin oluşturduğu klasörün tam yolunu buraya yazarsan garanti olur.
+# Eğer data.yaml dosyasını 'yolo_dataset_road' klasörünün hemen yanına koyacaksan:
+path: /home/otonom/furkan_wsyolo/yolo_dataset_road_engeldahil_yoladadahil
+train: train/images
+val: val/images
+
+# Sınıf sayısı (Sadece yol olduğu için 1)
+nc: 1
+
+# Sınıf ismi
+names:
+  0: road
