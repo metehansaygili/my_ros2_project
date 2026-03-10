@@ -4,13 +4,13 @@ This repository contains a comprehensive ROS 2 development environment tailored 
 
 ### Key Features
 
-    Containerized Development: Fully managed environment using Docker to eliminate "it works on my machine" issues.
+Containerized Development: Fully managed environment using Docker to eliminate "it works on my machine" issues.
 
-    Integrated Desktop Environment: Built-in VNC support (NoVNC) for GUI-based tools like RViz2 and Gazebo.
+Integrated Desktop Environment: Built-in VNC support (NoVNC) for GUI-based tools like RViz2 and Gazebo.
 
-    Autonomous Suite: Specialized packages for Perception, Localization (Sensor Fusion), and Path Planning.
+Autonomous Suite: Specialized packages for Perception, Localization (Sensor Fusion), and Path Planning.
 
-    Autoware Integration: Compatibility with Autoware-based stacks and message types.
+Autoware Integration: Compatibility with Autoware-based stacks and message types.
 
 ### Prerequisites
 
