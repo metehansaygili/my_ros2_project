@@ -1,0 +1,11 @@
+# Blender MTL File
+# Gri Metal - Parlamasiz
+newmtl Material.011
+Ns 0.000000
+Ka 0.500 0.500 0.500
+Kd 0.500 0.500 0.500
+Ks 0.000 0.000 0.000
+Ke 0.000 0.000 0.000
+Ni 1.000000
+d 1.000000
+illum 1

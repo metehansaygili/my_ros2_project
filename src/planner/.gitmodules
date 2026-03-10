@@ -1,0 +1,6 @@
+[submodule "Thirdparty/Clipper2"]
+	path = Thirdparty/Clipper2
+	url = https://github.com/AngusJohnson/Clipper2.git
+[submodule "Thirdparty/nanoflann"]
+	path = Thirdparty/nanoflann
+	url = https://github.com/jlblancoc/nanoflann.git

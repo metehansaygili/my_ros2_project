@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<sdf version="1.7">
+  <model name="park_yeri">
+    <static>true</static>
+    <link name="link">
+      <visual name="visual">
+        <geometry><mesh><uri>model://park_yeri/meshes/park_yeri.obj</uri></mesh></geometry>
+      </visual>
+      <collision name="collision">
+        <geometry><box><size>4 2 0.01</size></box></geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

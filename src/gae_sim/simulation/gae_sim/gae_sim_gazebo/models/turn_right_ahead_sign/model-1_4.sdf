@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<sdf version="1.4">
+  <model name="Turn Right Ahead">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <scale>10 10 10</scale>
+            <uri>model://turn_right_ahead_sign/meshes/turn_right_ahead_sign.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <scale>10 10 10</scale>
+            <uri>model://turn_right_ahead_sign/meshes/turn_right_ahead_sign.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>

@@ -1,0 +1,9 @@
+/**:
+  ros__parameters:
+    base_frame: base_link
+    gnss_base_frame: gnss_rear_right
+    map_frame: map
+    first_navsat_msg: "/sensing/gps_front/fix"
+    second_navsat_msg: "/sensing/gps_rear/fix"
+    publish_topic: "/gnss_pose_cov"
+    single_antenna_mode: false

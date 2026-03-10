@@ -1,0 +1,11 @@
+# Blender MTL File
+# Sari Duba - Canli ve Golgede Kararmaz
+newmtl Material.005
+Ns 0.000000
+Ka 1.000 0.800 0.000
+Kd 1.000 0.800 0.000
+Ks 0.000 0.000 0.000
+Ke 0.200 0.160 0.000
+Ni 1.000000
+d 1.000000
+illum 1

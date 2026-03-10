@@ -1,0 +1,172 @@
+#ifndef PLANNER__CONTROLLER_HPP_
+#define PLANNER__CONTROLLER_HPP_
+
+#include <rclcpp/rclcpp.hpp>
+#include <nav_msgs/msg/path.hpp>
+#include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
+#include <geometry_msgs/msg/twist_with_covariance_stamped.hpp>
+#include <std_msgs/msg/bool.hpp>
+#include <gae_msgs/msg/gae_control_cmd.hpp>
+#include <visualization_msgs/msg/marker.hpp>
+
+#include <Eigen/Dense>
+#include <osqp/osqp.h>
+
+#include <vector>
+#include <memory>
+#include <cmath>
+#include <limits>
+
+namespace itusct
+{
+
+/**
+ * @brief MPC Solver using OSQP for quadratic programming
+ * Implements a discrete kinematic bicycle model:
+ *   x_{k+1} = x_k + v_k * cos(yaw_k) * Ts
+ *   y_{k+1} = y_k + v_k * sin(yaw_k) * Ts
+ *   yaw_{k+1} = yaw_k + (v_k / L) * tan(delta_k) * Ts
+ *   v_{k+1} = v_k + a_k * Ts
+ * 
+ * State: [x, y, yaw, v]
+ * Control: [steering_angle, acceleration]
+ */
+class MPCSolver
+{
+public:
+    struct Parameters
+    {
+        int horizon;                      // Prediction horizon N
+        double ts;                        // Sampling time [s]
+        double wheelbase;                 // Vehicle wheelbase [m]
+        double max_steering_angle;        // Maximum steering angle [rad]
+        double max_acceleration;          // Maximum acceleration [m/s²]
+        double max_deceleration;          // Maximum deceleration [m/s²]
+        double min_speed;                 // Minimum speed [m/s]
+        double max_speed;                 // Maximum speed [m/s]
+        Eigen::Vector4d Q;                // State cost weights [x, y, yaw, v]
+        Eigen::Vector2d R;                // Control cost weights [steering, accel]
+    };
+
+    MPCSolver(const Parameters& params);
+    ~MPCSolver();
+
+    /**
+     * @brief Solve MPC problem
+     * @param x0 Initial state [x, y, yaw, v]
+     * @param reference Reference trajectory (N+1 states)
+     * @param steering Output steering angle [rad]
+     * @param acceleration Output acceleration [m/s²]
+     * @return true if solved successfully
+     */
+    bool solve(const Eigen::Vector4d& x0,
+               const std::vector<Eigen::Vector4d>& reference,
+               double& steering,
+               double& acceleration);
+    
+    // Getter for parameters
+    const Parameters& getParams() const { return params_; }
+
+private:
+    Parameters params_;
+    OSQPWorkspace* osqp_workspace_;
+    OSQPSettings* osqp_settings_;
+    OSQPData* osqp_data_;
+    
+    bool osqp_initialized_;
+    
+    // QP matrices (sparse format)
+    std::vector<c_float> P_data_;
+    std::vector<c_int> P_indices_;
+    std::vector<c_int> P_indptr_;
+    
+    std::vector<c_float> q_data_;
+    
+    std::vector<c_float> A_data_;
+    std::vector<c_int> A_indices_;
+    std::vector<c_int> A_indptr_;
+    
+    std::vector<c_float> l_data_;
+    std::vector<c_float> u_data_;
+    
+    void initializeOSQP();
+    void buildQPMatrices(const Eigen::Vector4d& x0,
+                        const std::vector<Eigen::Vector4d>& reference);
+    
+    // Linearization around reference trajectory
+    void linearizeModel(const Eigen::Vector4d& x_ref,
+                       const Eigen::Vector2d& u_ref,
+                       Eigen::Matrix4d& A,
+                       Eigen::Matrix<double, 4, 2>& B);
+};
+
+/**
+ * @brief MPC-based Vehicle Controller Component Node
+ * Replaces Pure Pursuit + PID with Model Predictive Control
+ */
+class Controller : public rclcpp::Node
+{
+public:
+    explicit Controller(const rclcpp::NodeOptions& options);
+
+private:
+    // ROS Callbacks
+    void pathCallback(const nav_msgs::msg::Path::SharedPtr msg);
+    void poseCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg);
+    void speedCallback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg);
+    void stopCallback(const std_msgs::msg::Bool::SharedPtr msg);
+    
+    // Core MPC control function
+    void computeMPCControl();
+    
+    // Helper functions
+    int findClosestPoint(const nav_msgs::msg::Path& path, 
+                        const Eigen::Vector2d& position);
+    
+    std::vector<Eigen::Vector4d> extractReferenceTrajectory(
+        const nav_msgs::msg::Path& path,
+        int start_idx,
+        int N);
+    
+    double computeYawFromPath(const nav_msgs::msg::Path& path, int idx);
+    
+    void publishControl(double steering_rad, double acceleration_mps2);
+    void publishEmergencyStop();
+    void publishVisualization(const std::vector<Eigen::Vector4d>& reference);
+    
+    double normalizeAngle(double angle);
+    
+    // ROS Publishers & Subscribers
+    rclcpp::Publisher<gae_msgs::msg::GaeControlCmd>::SharedPtr cmd_pub_;
+    rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr viz_pub_;
+    rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr debug_vehicle_marker_pub_;
+    rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr debug_closest_point_pub_;
+    rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr debug_text_pub_;
+    
+    rclcpp::Subscription<nav_msgs::msg::Path>::SharedPtr path_sub_;
+    rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr pose_sub_;
+    rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr speed_sub_;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr stop_sub_;
+    
+    // MPC Solver
+    std::unique_ptr<MPCSolver> mpc_solver_;
+    
+    // Vehicle State
+    Eigen::Vector4d current_state_;  // [x, y, yaw, v] in map frame
+    bool state_valid_;
+    
+    // Reference Path
+    nav_msgs::msg::Path current_path_;
+    bool path_valid_;
+    
+    // Safety
+    bool emergency_stop_;
+    
+    // Parameters
+    double wheel_radius_;           // For RPM <-> m/s conversion
+    double output_throttle_;        // Throttle state for rate limiting
+};
+
+} // namespace itusct
+
+#endif // PLANNER__CONTROLLER_HPP_

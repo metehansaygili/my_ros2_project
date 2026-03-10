@@ -1,0 +1,37 @@
+# Ignore build, install, and log directories
+/build/
+/install/
+/log/
+/logs/
+**/cmake-build-debug/
+
+# Ignore JetBrains project files
+.idea/
+*.iml
+*.iws
+out/
+
+# Ignore VS Code project files
+.vscode/
+.vscode/*
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore other common files
+*.log
+*.tmp
+.DS_Store
+*.swp
+*.swo
+*.bak
+
+# Ignore system files
+Thumbs.db
+Desktop.ini
+
+# Ignore virtual environments
+venv/
+.env

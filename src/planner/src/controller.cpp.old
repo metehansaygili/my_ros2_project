@@ -1,0 +1,775 @@
+#include "controller.hpp"
+#include <tf2/utils.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <algorithm>
+
+namespace itusct
+{
+
+// ============================================================================
+// MPCSolver Implementation
+// ============================================================================
+
+MPCSolver::MPCSolver(const Parameters& params)
+    : params_(params)
+    , osqp_workspace_(nullptr)
+    , osqp_settings_(nullptr)
+    , osqp_data_(nullptr)
+    , osqp_initialized_(false)
+{
+    initializeOSQP();
+}
+
+MPCSolver::~MPCSolver()
+{
+    if (osqp_workspace_) {
+        osqp_cleanup(osqp_workspace_);
+    }
+    if (osqp_settings_) {
+        c_free(osqp_settings_);
+    }
+    if (osqp_data_) {
+        if (osqp_data_->P) c_free(osqp_data_->P);
+        if (osqp_data_->A) c_free(osqp_data_->A);
+        c_free(osqp_data_);
+    }
+}
+
+void MPCSolver::initializeOSQP()
+{
+    const int nx = 4;
+    const int nu = 2;
+    const int N = params_.horizon;
+    
+    const int n_vars = (N + 1) * nx + N * nu;
+    // Constraints: dynamics (N*nx) + variable bounds (n_vars, one row per variable)
+    const int n_constraints = N * nx + n_vars;
+    
+    osqp_settings_ = static_cast<OSQPSettings*>(c_malloc(sizeof(OSQPSettings)));
+    osqp_data_ = static_cast<OSQPData*>(c_malloc(sizeof(OSQPData)));
+    
+    if (osqp_settings_ && osqp_data_) {
+        osqp_set_default_settings(osqp_settings_);
+        osqp_settings_->alpha = 1.0;
+        osqp_settings_->eps_abs = 1e-3;
+        osqp_settings_->eps_rel = 1e-3;
+        osqp_settings_->max_iter = 4000;
+        osqp_settings_->polish = true;
+        osqp_settings_->verbose = false;
+        
+        osqp_data_->n = n_vars;
+        osqp_data_->m = n_constraints;
+        osqp_data_->P = nullptr;
+        osqp_data_->q = nullptr;
+        osqp_data_->A = nullptr;
+        osqp_data_->l = nullptr;
+        osqp_data_->u = nullptr;
+    }
+}
+
+void MPCSolver::linearizeModel(const Eigen::Vector4d& x_ref,
+                               const Eigen::Vector2d& u_ref,
+                               Eigen::Matrix4d& A,
+                               Eigen::Matrix<double, 4, 2>& B)
+{
+    // State: [x, y, yaw, v]
+    // Control: [steering_angle, acceleration]
+    
+    const double yaw = x_ref(2);
+    const double v = std::max(x_ref(3), 10.0); // Avoid division by zero at low speed
+    const double delta = u_ref(0);
+    const double L = params_.wheelbase;
+    const double Ts = params_.ts;
+    
+    // Continuous-time linearization around current state
+    Eigen::Matrix4d Ac = Eigen::Matrix4d::Zero();
+    Ac(0, 2) = -v * std::sin(yaw);
+    Ac(0, 3) = std::cos(yaw);
+    Ac(1, 2) = v * std::cos(yaw);
+    Ac(1, 3) = std::sin(yaw);
+    Ac(2, 3) = std::tan(delta) / L;
+    
+    Eigen::Matrix<double, 4, 2> Bc = Eigen::Matrix<double, 4, 2>::Zero();
+    const double cos_delta_sq = std::cos(delta) * std::cos(delta);
+    Bc(2, 0) = v / (L * std::max(cos_delta_sq, 0.1)); // Prevent singularity
+    Bc(3, 1) = 1.0;
+    
+    // Discretization with Forward Euler
+    A = Eigen::Matrix4d::Identity() + Ac * Ts;
+    B = Bc * Ts;
+}
+
+void MPCSolver::buildQPMatrices(const Eigen::Vector4d& x0,
+                                const std::vector<Eigen::Vector4d>& reference)
+{
+    const int nx = 4;
+    const int nu = 2;
+    const int N = params_.horizon;
+    const int n_vars = (N + 1) * nx + N * nu;
+    
+    P_data_.clear();
+    P_indices_.clear();
+    P_indptr_.clear();
+    P_indptr_.push_back(0);
+    
+    for (int i = 0; i < n_vars; ++i) {
+        if (i < (N + 1) * nx) {
+            int state_idx = i % nx;
+            P_data_.push_back(params_.Q(state_idx));
+            P_indices_.push_back(i);
+        } else {
+            int control_idx = (i - (N + 1) * nx) % nu;
+            P_data_.push_back(params_.R(control_idx));
+            P_indices_.push_back(i);
+        }
+        P_indptr_.push_back(P_data_.size());
+    }
+    
+    q_data_.resize(n_vars, 0.0);
+    for (int k = 0; k <= N; ++k) {
+        if (k < static_cast<int>(reference.size())) {
+            for (int i = 0; i < nx; ++i) {
+                q_data_[k * nx + i] = -params_.Q(i) * reference[k](i);
+            }
+        }
+    }
+    
+    A_data_.clear();
+    A_indices_.clear();
+    A_indptr_.clear();
+    A_indptr_.push_back(0);
+    
+    l_data_.clear();
+    u_data_.clear();
+    
+    std::vector<Eigen::Matrix4d> A_mats(N);
+    std::vector<Eigen::Matrix<double, 4, 2>> B_mats(N);
+    
+    for (int k = 0; k < N; ++k) {
+        Eigen::Vector4d x_ref = (k < static_cast<int>(reference.size())) ? reference[k] : reference.back();
+        Eigen::Vector2d u_ref = Eigen::Vector2d::Zero();
+        linearizeModel(x_ref, u_ref, A_mats[k], B_mats[k]);
+    }
+    
+    for (int var = 0; var < n_vars; ++var) {
+        for (int k = 0; k < N; ++k) {
+            int constraint_offset = k * nx;
+            
+            if (var >= k * nx && var < (k + 1) * nx) {
+                int state_idx = var - k * nx;
+                for (int i = 0; i < nx; ++i) {
+                    if (std::abs(A_mats[k](i, state_idx)) > 1e-9) {
+                        A_data_.push_back(A_mats[k](i, state_idx));
+                        A_indices_.push_back(constraint_offset + i);
+                    }
+                }
+            }
+            
+            if (var >= (k + 1) * nx && var < (k + 2) * nx) {
+                int state_idx = var - (k + 1) * nx;
+                if (state_idx < nx) {
+                    A_data_.push_back(-1.0);
+                    A_indices_.push_back(constraint_offset + state_idx);
+                }
+            }
+            
+            if (var >= (N + 1) * nx + k * nu && var < (N + 1) * nx + (k + 1) * nu) {
+                int control_idx = var - ((N + 1) * nx + k * nu);
+                for (int i = 0; i < nx; ++i) {
+                    if (std::abs(B_mats[k](i, control_idx)) > 1e-9) {
+                        A_data_.push_back(B_mats[k](i, control_idx));
+                        A_indices_.push_back(constraint_offset + i);
+                    }
+                }
+            }
+        }
+        
+        A_data_.push_back(1.0);
+        A_indices_.push_back(N * nx + var);
+        A_indptr_.push_back(A_data_.size());
+    }
+    
+    for (int k = 0; k < N; ++k) {
+        for (int i = 0; i < nx; ++i) {
+            l_data_.push_back(0.0);
+            u_data_.push_back(0.0);
+        }
+    }
+    
+    for (int k = 0; k <= N; ++k) {
+        l_data_.push_back(-1e10); // x
+        u_data_.push_back(1e10);
+        l_data_.push_back(-1e10); // y
+        u_data_.push_back(1e10);
+        l_data_.push_back(-2 * M_PI); // yaw
+        u_data_.push_back(2 * M_PI);
+        l_data_.push_back(params_.min_speed); // v (RPM)
+        u_data_.push_back(params_.max_speed);
+    }
+    
+    for (int k = 0; k < N; ++k) {
+        l_data_.push_back(-params_.max_steering_angle); // steering
+        u_data_.push_back(params_.max_steering_angle);
+        l_data_.push_back(-params_.max_deceleration); // accel (RPM/s)
+        u_data_.push_back(params_.max_acceleration);
+    }
+    
+    for (int i = 0; i < nx; ++i) {
+        l_data_[N * nx + i] = x0(i);
+        u_data_[N * nx + i] = x0(i);
+    }
+}
+
+bool MPCSolver::solve(const Eigen::Vector4d& x0,
+                     const std::vector<Eigen::Vector4d>& reference,
+                     double& steering,
+                     double& acceleration)
+{
+    if (static_cast<int>(reference.size()) < params_.horizon + 1) {
+        return false;
+    }
+    
+    buildQPMatrices(x0, reference);
+    
+    // Create CSC matrices with CORRECT dimensions
+    // P matrix: n x n (symmetric)
+    csc* P_csc = csc_matrix(osqp_data_->n, osqp_data_->n, P_data_.size(),
+                            P_data_.data(), P_indices_.data(), P_indptr_.data());
+    
+    // A matrix: m x n (m constraints, n variables)  
+    csc* A_csc = csc_matrix(osqp_data_->m, osqp_data_->n, A_data_.size(),
+                            A_data_.data(), A_indices_.data(), A_indptr_.data());
+    
+    osqp_data_->P = P_csc;
+    osqp_data_->q = q_data_.data();
+    osqp_data_->A = A_csc;
+    osqp_data_->l = l_data_.data();
+    osqp_data_->u = u_data_.data();
+    
+    if (!osqp_initialized_) {
+        c_int exitflag = osqp_setup(&osqp_workspace_, osqp_data_, osqp_settings_);
+        if (exitflag != 0) {
+            return false;
+        }
+        osqp_initialized_ = true;
+    } else {
+        osqp_update_P_A(osqp_workspace_, P_csc->x, OSQP_NULL, P_csc->nzmax,
+                       A_csc->x, OSQP_NULL, A_csc->nzmax);
+        osqp_update_lin_cost(osqp_workspace_, q_data_.data());
+        osqp_update_bounds(osqp_workspace_, l_data_.data(), u_data_.data());
+    }
+    
+    osqp_solve(osqp_workspace_);
+    
+    if (osqp_workspace_->info->status_val != OSQP_SOLVED &&
+        osqp_workspace_->info->status_val != OSQP_SOLVED_INACCURATE) {
+        return false;
+    }
+    
+    const int nx = 4;
+    const int N = params_.horizon;
+    steering = osqp_workspace_->solution->x[(N + 1) * nx];
+    acceleration = osqp_workspace_->solution->x[(N + 1) * nx + 1];
+    
+    return true;
+}
+
+// ============================================================================
+// Controller Implementation
+// ============================================================================
+
+Controller::Controller(const rclcpp::NodeOptions& options)
+    : Node("controller_exe", options)
+    , state_valid_(false)
+    , path_valid_(false)
+    , emergency_stop_(false)
+    , output_throttle_(0.0)
+{
+    RCLCPP_INFO(this->get_logger(), "MPC Controller initialized!");
+    
+    // Declare topic parameters
+    this->declare_parameter<std::string>("trajectory_topic", "/path");
+    this->declare_parameter<std::string>("pose_topic", "/pose");
+    this->declare_parameter<std::string>("autonomous_cmd_topic", "/controller/vehicle_control");
+    this->declare_parameter<std::string>("mpc_viz_topic", "/mpc_reference_trajectory");
+    
+    // MPC parameters
+    this->declare_parameter<int>("mpc_horizon", 15);
+    this->declare_parameter<double>("mpc_ts", 0.1);
+    this->declare_parameter<double>("wheelbase", 1.5);
+    this->declare_parameter<double>("max_steering_angle", 30.0);
+    this->declare_parameter<double>("max_acceleration", 20.0);     // RPM/s
+    this->declare_parameter<double>("max_deceleration", 30.0);     // RPM/s
+    this->declare_parameter<double>("min_speed", 30.0);            // RPM
+    this->declare_parameter<double>("max_speed", 300.0);           // RPM
+    this->declare_parameter<double>("wheel_radius", 0.45);
+    
+    // MPC cost weights
+    this->declare_parameter<double>("mpc_Q_x", 5.0);
+    this->declare_parameter<double>("mpc_Q_y", 5.0);
+    this->declare_parameter<double>("mpc_Q_yaw", 2.0);
+    this->declare_parameter<double>("mpc_Q_v", 1.0);
+    this->declare_parameter<double>("mpc_R_steering", 0.5);
+    this->declare_parameter<double>("mpc_R_accel", 0.1);
+    
+    // Get topic names
+    std::string trajectory_topic = this->get_parameter("trajectory_topic").as_string();
+    std::string pose_topic = this->get_parameter("pose_topic").as_string();
+    std::string cmd_topic = this->get_parameter("autonomous_cmd_topic").as_string();
+    std::string viz_topic = this->get_parameter("mpc_viz_topic").as_string();
+    
+    // Get parameters
+    MPCSolver::Parameters mpc_params;
+    mpc_params.horizon = this->get_parameter("mpc_horizon").as_int();
+    mpc_params.ts = this->get_parameter("mpc_ts").as_double();
+    mpc_params.wheelbase = this->get_parameter("wheelbase").as_double();
+    mpc_params.max_steering_angle = this->get_parameter("max_steering_angle").as_double() * M_PI / 180.0;
+    mpc_params.max_acceleration = this->get_parameter("max_acceleration").as_double();
+    mpc_params.max_deceleration = this->get_parameter("max_deceleration").as_double();
+    mpc_params.min_speed = this->get_parameter("min_speed").as_double();
+    mpc_params.max_speed = this->get_parameter("max_speed").as_double();
+    
+    mpc_params.Q << 
+        this->get_parameter("mpc_Q_x").as_double(),
+        this->get_parameter("mpc_Q_y").as_double(),
+        this->get_parameter("mpc_Q_yaw").as_double(),
+        this->get_parameter("mpc_Q_v").as_double();
+    
+    mpc_params.R << 
+        this->get_parameter("mpc_R_steering").as_double(),
+        this->get_parameter("mpc_R_accel").as_double();
+    
+    wheel_radius_ = this->get_parameter("wheel_radius").as_double();
+    
+    RCLCPP_INFO(this->get_logger(), "MPC Parameters:");
+    RCLCPP_INFO(this->get_logger(), "  Horizon: %d", mpc_params.horizon);
+    RCLCPP_INFO(this->get_logger(), "  Ts: %.3f s", mpc_params.ts);
+    RCLCPP_INFO(this->get_logger(), "  Speed range: [%.1f, %.1f] RPM", mpc_params.min_speed, mpc_params.max_speed);
+    RCLCPP_INFO(this->get_logger(), "  Accel range: [%.1f, %.1f] RPM/s", -mpc_params.max_deceleration, mpc_params.max_acceleration);
+    RCLCPP_INFO(this->get_logger(), "Topic Names:");
+    RCLCPP_INFO(this->get_logger(), "  Trajectory Topic: %s", trajectory_topic.c_str());
+    RCLCPP_INFO(this->get_logger(), "  Pose Topic: %s", pose_topic.c_str());
+    RCLCPP_INFO(this->get_logger(), "  Autonomous Command Topic: %s", cmd_topic.c_str());
+    RCLCPP_INFO(this->get_logger(), "  MPC Visualization Topic: %s", viz_topic.c_str());
+    
+    // Initialize MPC solver
+    mpc_solver_ = std::make_unique<MPCSolver>(mpc_params);
+    
+    // Publishers
+    cmd_pub_ = this->create_publisher<gae_msgs::msg::GaeControlCmd>(cmd_topic, 10);
+    viz_pub_ = this->create_publisher<visualization_msgs::msg::Marker>(viz_topic, 10);
+    debug_vehicle_marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("/mpc_debug_vehicle", 10);
+    debug_closest_point_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("/mpc_debug_closest_point", 10);
+    debug_text_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("/mpc_debug_text", 10);
+    
+    // Subscribers
+    path_sub_ = this->create_subscription<nav_msgs::msg::Path>(
+        trajectory_topic, 10,
+        std::bind(&Controller::pathCallback, this, std::placeholders::_1));
+    
+    pose_sub_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
+        pose_topic, 10,
+        std::bind(&Controller::poseCallback, this, std::placeholders::_1));
+    
+    speed_sub_ = this->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
+        "/vehicle/cmd_vel_cov", 10,
+        std::bind(&Controller::speedCallback, this, std::placeholders::_1));
+    
+    stop_sub_ = this->create_subscription<std_msgs::msg::Bool>(
+        "/stop", 10,
+        std::bind(&Controller::stopCallback, this, std::placeholders::_1));
+    
+    current_state_.setZero();
+    
+    RCLCPP_INFO(this->get_logger(), "Topics:");
+    RCLCPP_INFO(this->get_logger(), "  Path: %s", trajectory_topic.c_str());
+    RCLCPP_INFO(this->get_logger(), "  Pose: %s", pose_topic.c_str());
+    RCLCPP_INFO(this->get_logger(), "  Cmd: %s", cmd_topic.c_str());
+    RCLCPP_INFO(this->get_logger(), "  Viz: %s", viz_topic.c_str());
+    RCLCPP_INFO(this->get_logger(), "MPC Controller ready!");
+}
+
+void Controller::pathCallback(const nav_msgs::msg::Path::SharedPtr msg)
+{
+    if (msg->poses.size() < 2) {
+        path_valid_ = false;
+        return;
+    }
+    
+    current_path_ = *msg;
+    path_valid_ = true;
+}
+
+void Controller::poseCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)
+{
+    current_state_(0) = msg->pose.pose.position.x;
+    current_state_(1) = msg->pose.pose.position.y;
+    
+    tf2::Quaternion q(
+        msg->pose.pose.orientation.x,
+        msg->pose.pose.orientation.y,
+        msg->pose.pose.orientation.z,
+        msg->pose.pose.orientation.w);
+    
+    tf2::Matrix3x3 m(q);
+    double roll, pitch, yaw;
+    m.getRPY(roll, pitch, yaw);
+    current_state_(2) = yaw;
+    
+    state_valid_ = true;
+    
+    computeMPCControl();
+}
+
+void Controller::speedCallback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg)
+{
+    // Convert m/s to RPM (same as old controller)
+    double linear_speed = msg->twist.twist.linear.x;
+    current_state_(3) = (linear_speed / (2 * M_PI * wheel_radius_)) * 60.0;
+}
+
+void Controller::stopCallback(const std_msgs::msg::Bool::SharedPtr msg)
+{
+    emergency_stop_ = msg->data;
+    
+    if (emergency_stop_) {
+        publishEmergencyStop();
+        RCLCPP_WARN(this->get_logger(), "Emergency stop activated!");
+    }
+}
+
+void Controller::computeMPCControl()
+{
+    if (emergency_stop_) {
+        publishEmergencyStop();
+        return;
+    }
+    
+    if (!state_valid_) {
+        RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                            "State not valid! state_valid_=%d", state_valid_);
+        return;
+    }
+    
+    if (!path_valid_) {
+        RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                            "Path not valid! path_valid_=%d, path size=%zu", 
+                            path_valid_, current_path_.poses.size());
+        return;
+    }
+    
+    if (current_path_.poses.size() < 2) {
+        RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                            "Path too short: %zu poses", current_path_.poses.size());
+        return;
+    }
+    
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
+                        "=== MPC Control Loop ===");
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
+                        "Current State: x=%.2f y=%.2f yaw=%.2f° v=%.1f RPM",
+                        current_state_(0), current_state_(1), 
+                        current_state_(2)*180.0/M_PI, current_state_(3));
+    
+    // Debug: Publish current vehicle position
+    visualization_msgs::msg::Marker vehicle_marker;
+    vehicle_marker.header.frame_id = "map";
+    vehicle_marker.header.stamp = this->now();
+    vehicle_marker.ns = "mpc_debug";
+    vehicle_marker.id = 0;
+    vehicle_marker.type = visualization_msgs::msg::Marker::ARROW;
+    vehicle_marker.action = visualization_msgs::msg::Marker::ADD;
+    vehicle_marker.pose.position.x = current_state_(0);
+    vehicle_marker.pose.position.y = current_state_(1);
+    vehicle_marker.pose.position.z = 0.5;
+    
+    tf2::Quaternion q;
+    q.setRPY(0, 0, current_state_(2));
+    vehicle_marker.pose.orientation.x = q.x();
+    vehicle_marker.pose.orientation.y = q.y();
+    vehicle_marker.pose.orientation.z = q.z();
+    vehicle_marker.pose.orientation.w = q.w();
+    
+    vehicle_marker.scale.x = 2.0;
+    vehicle_marker.scale.y = 0.5;
+    vehicle_marker.scale.z = 0.5;
+    vehicle_marker.color.r = 1.0;
+    vehicle_marker.color.g = 0.0;
+    vehicle_marker.color.b = 0.0;
+    vehicle_marker.color.a = 1.0;
+    debug_vehicle_marker_pub_->publish(vehicle_marker);
+    
+    Eigen::Vector2d current_position(current_state_(0), current_state_(1));
+    int closest_idx = findClosestPoint(current_path_, current_position);
+    
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
+                        "Closest point idx: %d / %zu, pos: (%.2f, %.2f)",
+                        closest_idx, current_path_.poses.size(),
+                        current_path_.poses[closest_idx].pose.position.x,
+                        current_path_.poses[closest_idx].pose.position.y);
+    
+    // Debug: Publish closest point
+    visualization_msgs::msg::Marker closest_marker;
+    closest_marker.header.frame_id = "map";
+    closest_marker.header.stamp = this->now();
+    closest_marker.ns = "mpc_debug";
+    closest_marker.id = 1;
+    closest_marker.type = visualization_msgs::msg::Marker::SPHERE;
+    closest_marker.action = visualization_msgs::msg::Marker::ADD;
+    closest_marker.pose.position.x = current_path_.poses[closest_idx].pose.position.x;
+    closest_marker.pose.position.y = current_path_.poses[closest_idx].pose.position.y;
+    closest_marker.pose.position.z = 0.5;
+    closest_marker.scale.x = 1.0;
+    closest_marker.scale.y = 1.0;
+    closest_marker.scale.z = 1.0;
+    closest_marker.color.r = 0.0;
+    closest_marker.color.g = 1.0;
+    closest_marker.color.b = 0.0;
+    closest_marker.color.a = 1.0;
+    debug_closest_point_pub_->publish(closest_marker);
+    
+    const int N = mpc_solver_->getParams().horizon;
+    std::vector<Eigen::Vector4d> reference = extractReferenceTrajectory(
+        current_path_, closest_idx, N);
+    
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
+                        "Reference trajectory: %zu points (need %d)", 
+                        reference.size(), N+1);
+    
+    if (static_cast<int>(reference.size()) < N + 1) {
+        RCLCPP_WARN(this->get_logger(),
+                   "Not enough reference points! Got %zu, need %d",
+                   reference.size(), N+1);
+        return;
+    }
+    
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
+                        "Calling MPC solver...");
+    
+    double steering_rad, acceleration_rpm_s;
+    bool success = mpc_solver_->solve(current_state_, reference, steering_rad, acceleration_rpm_s);
+    
+    if (!success) {
+        RCLCPP_WARN(this->get_logger(), "MPC solver FAILED!");
+        return;
+    }
+    
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
+                        "MPC SUCCESS! steering=%.2f° accel=%.1f RPM/s",
+                        steering_rad*180.0/M_PI, acceleration_rpm_s);
+    
+    publishControl(steering_rad, acceleration_rpm_s);
+    publishVisualization(reference);
+    
+    // Debug: Text marker with info
+    visualization_msgs::msg::Marker text_marker;
+    text_marker.header.frame_id = "map";
+    text_marker.header.stamp = this->now();
+    text_marker.ns = "mpc_debug";
+    text_marker.id = 2;
+    text_marker.type = visualization_msgs::msg::Marker::TEXT_VIEW_FACING;
+    text_marker.action = visualization_msgs::msg::Marker::ADD;
+    text_marker.pose.position.x = current_state_(0);
+    text_marker.pose.position.y = current_state_(1);
+    text_marker.pose.position.z = 2.0;
+    text_marker.scale.z = 0.5;
+    text_marker.color.r = 1.0;
+    text_marker.color.g = 1.0;
+    text_marker.color.b = 1.0;
+    text_marker.color.a = 1.0;
+    
+    char text[256];
+    snprintf(text, sizeof(text), "v=%.0f RPM\nδ=%.1f°\na=%.1f", 
+             current_state_(3), steering_rad*180.0/M_PI, acceleration_rpm_s);
+    text_marker.text = text;
+    debug_text_pub_->publish(text_marker);
+}
+
+int Controller::findClosestPoint(const nav_msgs::msg::Path& path, 
+                                const Eigen::Vector2d& position)
+{
+    double min_dist = std::numeric_limits<double>::max();
+    int closest_idx = 0;
+    
+    for (size_t i = 0; i < path.poses.size(); ++i) {
+        double dx = path.poses[i].pose.position.x - position.x();
+        double dy = path.poses[i].pose.position.y - position.y();
+        double dist = std::sqrt(dx * dx + dy * dy);
+        
+        if (dist < min_dist) {
+            min_dist = dist;
+            closest_idx = i;
+        }
+    }
+    
+    return closest_idx;
+}
+
+std::vector<Eigen::Vector4d> Controller::extractReferenceTrajectory(
+    const nav_msgs::msg::Path& path,
+    int start_idx,
+    int N)
+{
+    std::vector<Eigen::Vector4d> reference;
+    
+    // Use more conservative target speed - 50% instead of 70%
+    const double target_speed = mpc_solver_->getParams().max_speed * 0.5;
+    
+    for (int i = 0; i <= N; ++i) {
+        int idx = std::min(start_idx + i * 2, static_cast<int>(path.poses.size()) - 1); // Skip points for smoother ref
+        
+        Eigen::Vector4d state;
+        state(0) = path.poses[idx].pose.position.x;
+        state(1) = path.poses[idx].pose.position.y;
+        state(2) = computeYawFromPath(path, idx);
+        // More conservative speed ramp: use minimum of target and gradual increase
+        state(3) = std::min(target_speed, std::max(mpc_solver_->getParams().min_speed, 
+                                                     current_state_(3) + i * 5.0));
+        
+        reference.push_back(state);
+    }
+    
+    return reference;
+}
+
+double Controller::computeYawFromPath(const nav_msgs::msg::Path& path, int idx)
+{
+    if (idx >= static_cast<int>(path.poses.size()) - 1) {
+        tf2::Quaternion q(
+            path.poses[idx].pose.orientation.x,
+            path.poses[idx].pose.orientation.y,
+            path.poses[idx].pose.orientation.z,
+            path.poses[idx].pose.orientation.w);
+        
+        tf2::Matrix3x3 m(q);
+        double roll, pitch, yaw;
+        m.getRPY(roll, pitch, yaw);
+        return yaw;
+    }
+    
+    double dx = path.poses[idx + 1].pose.position.x - path.poses[idx].pose.position.x;
+    double dy = path.poses[idx + 1].pose.position.y - path.poses[idx].pose.position.y;
+    return std::atan2(dy, dx);
+}
+
+void Controller::publishControl(double steering_rad, double acceleration_rpm_s)
+{
+    gae_msgs::msg::GaeControlCmd cmd;
+    
+    // Steering: MPC gives steering in radians
+    // Vehicle command: 0-3600, where 1800 = center
+    // Convert: steering_rad -> degrees -> map to [0, 3600]
+    double steering_deg = steering_rad * 180.0 / M_PI;
+    
+    // Normalize to [-1, 1] range
+    double steering_normalized = steering_deg / (mpc_solver_->getParams().max_steering_angle * 180.0 / M_PI);
+    
+    // INVERTED: positive angle = right turn = <1800, negative angle = left turn = >1800
+    int raw_steering = static_cast<int>(1800.0 - steering_normalized * 1800.0);
+    raw_steering = std::clamp(raw_steering, 0, 3600);
+    
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
+                        "Steering: %.2f rad = %.2f° -> norm=%.3f -> cmd=%d",
+                        steering_rad, steering_deg, steering_normalized, raw_steering);
+    
+    // Acceleration to throttle/brake (same logic as old controller applyThrottleLimit)
+    uint16_t throttle = 0;
+    uint16_t brake = 0;
+    uint8_t mechanical_brake = 0;
+    
+    if (acceleration_rpm_s > 0) {
+        // Limit acceleration change
+        double new_throttle = acceleration_rpm_s;
+        double max_accel = mpc_solver_->getParams().max_acceleration;
+        if (new_throttle > output_throttle_ + max_accel) {
+            new_throttle = output_throttle_ + max_accel;
+        }
+        
+        output_throttle_ = new_throttle;
+        throttle = static_cast<uint16_t>(std::clamp(output_throttle_, 0.0, 1000.0));
+        brake = 0;
+    } else {
+        // Braking
+        double brake_value = -acceleration_rpm_s;
+        double max_decel = mpc_solver_->getParams().max_deceleration;
+        if (brake_value > max_decel) {
+            brake_value = max_decel;
+        }
+        
+        throttle = 0;
+        brake = static_cast<uint16_t>(std::clamp(brake_value, 0.0, 10000.0));
+        output_throttle_ = 0.0;
+        
+        if (brake > 5000) {
+            mechanical_brake = 1;
+        }
+    }
+    
+    cmd.steering = raw_steering;
+    cmd.throttle = throttle;
+    cmd.brake = brake;
+    cmd.mechanical_brake = mechanical_brake;
+    cmd.gear = 1;
+    cmd.mode_auto = 1;
+    cmd.signal = 0;
+    cmd.brake_voltage = static_cast<uint8_t>(std::min(static_cast<unsigned>(brake / 1000), 10u));
+    
+    cmd_pub_->publish(cmd);
+    
+    RCLCPP_DEBUG(this->get_logger(), 
+                "MPC: steering=%.2f° (cmd=%d), accel=%.1f RPM/s (throttle=%d, brake=%d)",
+                steering_deg, raw_steering, acceleration_rpm_s, throttle, brake);
+}
+
+void Controller::publishEmergencyStop()
+{
+    gae_msgs::msg::GaeControlCmd cmd;
+    cmd.throttle = 0;
+    cmd.steering = 1800;
+    cmd.brake = 10000;
+    cmd.mechanical_brake = 1;
+    cmd.gear = 1;
+    cmd.mode_auto = 1;
+    cmd.signal = 0;
+    cmd.brake_voltage = 10;
+    
+    cmd_pub_->publish(cmd);
+}
+
+void Controller::publishVisualization(const std::vector<Eigen::Vector4d>& reference)
+{
+    visualization_msgs::msg::Marker marker;
+    marker.header.frame_id = "map";
+    marker.header.stamp = this->now();
+    marker.ns = "mpc_reference";
+    marker.id = 0;
+    marker.type = visualization_msgs::msg::Marker::LINE_STRIP;
+    marker.action = visualization_msgs::msg::Marker::ADD;
+    marker.scale.x = 0.2;
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
+    marker.color.a = 1.0;
+    
+    for (const auto& state : reference) {
+        geometry_msgs::msg::Point p;
+        p.x = state(0);
+        p.y = state(1);
+        p.z = 0.0;
+        marker.points.push_back(p);
+    }
+    
+    viz_pub_->publish(marker);
+}
+
+double Controller::normalizeAngle(double angle)
+{
+    while (angle > M_PI) angle -= 2.0 * M_PI;
+    while (angle < -M_PI) angle += 2.0 * M_PI;
+    return angle;
+}
+
+} // namespace itusct
+
+#include <rclcpp_components/register_node_macro.hpp>
+RCLCPP_COMPONENTS_REGISTER_NODE(itusct::Controller)

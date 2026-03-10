@@ -1,0 +1,24 @@
+# Blender MTL File
+# Mavi ve Siyah
+
+newmtl Material.006
+Ns 0.000000
+# Mavi
+Ka 0.000 0.000 1.000
+Kd 0.000 0.000 1.000
+Ks 0.000 0.000 0.000
+Ke 0.100 0.100 0.300
+Ni 1.000000
+d 1.000000
+illum 1
+
+newmtl Material.007
+Ns 0.000000
+# Siyah (Zifiri olmamasi icin hafif gri yaptim)
+Ka 0.100 0.100 0.100
+Kd 0.100 0.100 0.100
+Ks 0.000 0.000 0.000
+Ke 0.000 0.000 0.000
+Ni 1.000000
+d 1.000000
+illum 1

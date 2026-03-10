@@ -1,0 +1,6 @@
+[submodule "velodyne_simulator"]
+	path = velodyne_simulator
+	url = https://github.com/ToyotaResearchInstitute/velodyne_simulator.git
+[submodule "gae_sim_gazebo/models"]
+	path = gae_sim_gazebo/models
+	url = git@github.com:ITU-ZES-Solar-Car-Team/gae_gazebo_models.git

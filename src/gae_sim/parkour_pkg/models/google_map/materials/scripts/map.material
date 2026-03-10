@@ -1,0 +1,14 @@
+material Map/Texture
+{
+  technique
+  {
+    pass
+    {
+      lighting off
+      texture_unit
+      {
+        texture harita.png
+      }
+    }
+  }
+}

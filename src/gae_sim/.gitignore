@@ -1,0 +1,41 @@
+# Ignore all .vscode directories
+.vscode/
+
+# Ignore build directories
+build/
+devel/
+install/
+log/
+
+# Ignore log files
+logs/
+*.log
+
+# Ignore swap files
+*.swp
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Ignore ROS specific files
+.env
+ros_test_results/
+.launch.*
+
+# Ignore specific tools and IDEs files
+.DS_Store
+
+# Ignore node_modules for Node.js dependencies (if any)
+node_modules/
+
+# Ignore other potentially unwanted files
+*.tmp
+*.bak
+*~

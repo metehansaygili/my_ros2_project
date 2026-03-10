@@ -1,0 +1,187 @@
+---
+common_parameters:
+  osm_path: &osm_path "install/gae_launch/share/gae_launch/maps/shell_sim_map23/lane.osm"
+  _x: &_x 40.64479964953
+  _y: &_y 28.18269962266
+  pose_topic: &pose_topic "/ekf_pose_with_covariance"
+  telemetry_topic: &telemetry_topic "/vehicle/telemetry"
+  yolo_topic: &yolo_topic "/yolo_detections"
+  no_entry_topic: &no_entry_topic "/no_entry_ids"
+  switch_to_centerline_topic: &switch_to_centerline_topic "/switch_controller"
+  speed_limit_topic: &speed_limit_topic "/speed_limit"
+  cluster_topic: &cluster_topic "/all_bottom_clusters"
+  max_speed: &max_speed 60.0
+  min_speed: &min_speed 40.0
+  camera_mode: &camera_mode true
+  camera_path_topic: &camera_path_topic "/drivable_area/centerline_base_link"
+global_planner_exe:
+  ros__parameters:  
+    origin_pose:
+      _x: *_x
+      _y: *_y
+    osm_path: *osm_path
+    rviz_goal_topic: "/move_base_simple/goal"
+    station_name: "durak"
+    park_name: "park"
+    rviz_pose: false # second day we need to set goal pose to parking entry because we are required to detect traffic signs and to plan the path to parking entry
+    goal_pose_topic: "/global_planner/goal"
+    first_goal_id: 492
+    parking_lot_entry_id: 492 # changed from 105
+    is_first_day: true
+    stopping_at_station_tolerance: 1.0
+    stopping_at_park_tolerance: 1.3
+    pose_topic: *pose_topic
+    cluster_topic: *cluster_topic
+    yolo_topic: *yolo_topic
+    no_entry_topic: *no_entry_topic
+    switch_to_centerline_topic: *switch_to_centerline_topic
+    speed_limit_topic: *speed_limit_topic
+    station_marker_topic: "/station_marker"
+    min_confidence_to_consider_free_parking_spot_detection: 0.6
+    parking_lock_distance: 3.0
+    required_stable_count: 3
+    camera_mode: *camera_mode
+
+mission_planner_exe:
+  ros__parameters:
+    origin_pose:
+      _x: *_x
+      _y: *_y
+    osm_path: *osm_path
+    pose_topic: *pose_topic
+    path_topic: "/mission_planner/path"
+    goal_pose_topic: "/global_planner/goal"
+    stop_topic: "/mission_planner/stop_distance"
+    telemetry_topic: *telemetry_topic
+    yolo_topic: *yolo_topic
+    station_name: "durak"
+    park_name: "park"
+    switch_to_centerline_topic: *switch_to_centerline_topic
+    no_entry_topic: *no_entry_topic
+    cluster_topic: *cluster_topic
+    occupancy_grid_topic: "/occupancy_grid"
+
+occupancy_grid_exe:
+  ros__parameters:
+    grid_resolution: 0.3
+    grid_size: 400
+    origin_pose:
+      _x: *_x
+      _y: *_y
+    osm_path: *osm_path
+    pose_topic: *pose_topic
+    occupancy_grid_topic: "/occupancy_grid"
+    cluster_topic: *cluster_topic
+    path_topic: "/mission_planner/path"
+    vehicle_width: 1.4
+    vehicle_length: 2.0
+    safety_margin: 0.5                 # Reduced from 0.7 for tighter clearance
+    base_obstacle_radius: 0.4          # Reduced from 0.6 - tighter obstacle representation
+    obstacle_core_radius: 1.5          # Reduced from 2.0 - smaller core
+    lateral_clearance_factor: 1.1      # Reduced from 1.3 - less lateral inflation
+    prediction_time_min: 0.3           # Reduced from 0.5 - shorter prediction
+    prediction_time_max: 0.7           # Reduced from 1.0 - shorter max prediction
+    max_prediction_distance: 1.0       # Reduced from 3.0 - less forward inflation
+    association_distance: 2.0          # Maximum distance for obstacle association (meters)
+    prob_hit: 0.7                      # P(detection | obstacle exists)
+    prob_miss: 0.3                     # P(no detection | obstacle exists)
+    prob_threshold_render: 0.3         # Lowered from 0.4 - more stable obstacle display
+    prob_threshold_delete: 0.1         # Minimum probability to keep tracking
+    alpha_position: 0.3                # Position smoothing factor (0-1)
+    alpha_velocity: 0.5                # Velocity smoothing factor (0-1)
+    static_velocity_threshold: 0.5     # Below this speed considered static (m/s)
+    prediction_decay_rate: 0.95        # Probability decay per second during occlusion
+    debug_mode: false
+    camera_mode: *camera_mode
+
+trajectory_planner_exe:
+  ros__parameters:
+    origin_pose:
+      _x: *_x
+      _y: *_y
+    osm_path: *osm_path
+    pose_topic: *pose_topic
+    telemetry_topic: *telemetry_topic
+    camera_mode: *camera_mode
+    camera_path_topic: *camera_path_topic
+    follow_centerline: true
+    curvature_contributing_factor: 3.0
+    centerline_contributing_factor: 7.0
+    clearance: 0
+    occupancy_grid_topic: "/occupancy_grid"
+    path_topic: "/mission_planner/path"
+    trajectory_topic: "/trajectory_planner/trajectory"
+    switch_controller_topic: *switch_to_centerline_topic
+    stop_a_star_planning_in_parking_sector_threshold: 2.5
+    stopping_distance_to_parking_spot: 0.5
+    lattice_planner_horizon: 25.0
+    max_speed: *max_speed
+    min_speed: *min_speed
+    lattice_max_horizon: 14.0
+    lattice_min_horizon: 8.0
+
+controller_exe:
+  ros__parameters:
+    trajectory_topic: "/trajectory_planner/trajectory"
+    camera_mode: *camera_mode
+    pose_topic: *pose_topic
+    autonomous_cmd_topic: "/controller/vehicle_control"
+    stop_topic: "/mission_planner/stop_distance"
+    telemetry_topic: *telemetry_topic
+    base_lookahead_distance: 4.0
+    sensitivity: 2.5
+    max_speed: *max_speed
+    min_speed: *min_speed
+    max_acceleration: 50.0
+    max_deceleration: 400.0
+    max_steering_angle: 17.0
+    min_lookahead_distance: 4.0
+    brake_distance: 25.0
+    wheelbase: 1.8
+    Kp: 2.0 # for v ref generation
+    Kd: 0.3 # for v ref generation
+    Ts: 0.1
+    Kp_speed: 2.0
+    Ki_speed: 0.3
+    Kd_speed: 0.01
+    switch_controller_topic: *switch_to_centerline_topic
+    
+    # MPC Controller parameters (BALANCED VELOCITY-ADAPTIVE)
+    # 
+    # Speed scaling behavior:
+    # - LOW (0-3 m/s):  CTE 2.5x, heading 2x, smoothness 0.8x  (PRECISE for obstacles)
+    # - MEDIUM (3-7 m/s): Transition zone
+    # - HIGH (7+ m/s): CTE 0.7x, heading 0.7x, smoothness 5x (SMOOTH to prevent oscillation)
+    #
+    use_mpc: false
+    mpc_horizon: 20
+    mpc_dt: 0.2
+    
+    # MPC Base Weights (scaled dynamically by speed)
+    mpc_w_cte: 1000.0          # Cross-track error (x2.5 at low speed, x0.7 at high)
+    mpc_w_epsi: 1500.0         # Heading error (x2 at low speed, x0.7 at high)
+    mpc_w_v: 5.0             # Velocity tracking weight
+    mpc_w_delta: 20.0        # Steering magnitude (x0.8 at low, x2 at high)
+    mpc_w_ddelta: 2500.0     # Steering smoothness (x0.8 at low, x5 at high)
+    mpc_w_a: 5.0             # Acceleration weight
+    mpc_w_da: 50.0           # Acceleration smoothness
+    
+    # Yaw rate damping (oscillation prevention via second-order dynamics)
+    imu_topic: "/sensing/imu/imu_raw"  # IMU topic for yaw rate
+    mpc_w_omega: 100.0       # Penalize high yaw rates (prevents fast turning)
+    mpc_w_domega: 500.0      # Penalize yaw acceleration (ensures smooth turns)
+    
+    # Stanley Controller (alternative for high-speed racing)
+    use_stanley: false
+    stanley_k_cte: 0.5         # Cross-track error gain
+    stanley_k_heading: 0.5     # Heading error gain
+    stanley_k_soft: 2.0        # More smoothing at low speed
+
+    max_throttle_increase_rate: 20.0 
+    max_throttle_decrease_rate: 50.0
+    min_brake_threshold: 3.0
+ # MPC direct brake control
+    mpc_brake_gain: 15.0  # Daha yumuşak fren (30→15)
+    mpc_brake_acceleration_threshold: -0.5  # -0.5 yerine -0.8 (daha az hassas)
+    ## mpc should obey v ref limits
+    

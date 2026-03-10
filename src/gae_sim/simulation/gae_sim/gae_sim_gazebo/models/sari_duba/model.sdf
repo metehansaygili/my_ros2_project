@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<sdf version="1.7">
+  <model name="sari_duba">
+    <static>false</static>
+    <link name="link">
+      <inertial>
+        <mass>10.0</mass>
+        <inertia>
+          <ixx>1.0</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.0</iyy><iyz>0</iyz><izz>1.0</izz>
+        </inertia>
+      </inertial>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>file:///home/yigit/shell_ws/src/parkour_pkg/models/model_files/meshes/sari_duba.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <collision name="collision">
+        <pose>0 3.14 0.15 0 0 0</pose> 
+        <geometry>
+          <box>
+            <size>0.305265 6.29114 0.305265</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

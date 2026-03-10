@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<sdf version="1.7">
+  <model name="sari_cizgi">
+    <static>true</static>
+    <link name="link">
+      <visual name="visual">
+        <geometry><mesh><uri>model://sari_cizgi/meshes/sari_cizgi.obj</uri></mesh></geometry>
+      </visual>
+      <collision name="collision">
+        <geometry><box><size>1 1 0.01</size></box></geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

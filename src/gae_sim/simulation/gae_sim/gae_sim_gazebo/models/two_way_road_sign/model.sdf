@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="two_way_road_sign">
+    <static>true</static>
+    <link name="link">
+      <visual name="visual">
+      	<pose>0 0 0 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://two_way_road_sign/meshes/two_way_road_sign.obj</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://two_way_road_sign/materials/scripts</uri>
+            <name>street_signs</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
+

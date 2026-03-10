@@ -1,0 +1,1809 @@
+<sdf version='1.7'>
+  <world name='parkour_world'>
+    <light name='sun' type='directional'>
+      <cast_shadows>1</cast_shadows>
+      <pose>0 0 10 0 -0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+      <spot>
+        <inner_angle>0</inner_angle>
+        <outer_angle>0</outer_angle>
+        <falloff>0</falloff>
+      </spot>
+    </light>
+
+    <model name='google_map'>
+      <static>true</static>
+      <pose>00 -54 -0.5 0 0 0.022</pose>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>250 250</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>250 250</size>
+            </plane>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://google_map/materials/scripts</uri>
+              <uri>model://google_map/materials/textures</uri>
+              <name>Map/Texture</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name='yol'>
+      <static>1</static>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://yol/meshes/yol_mid.dae</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>100 -20 -0.05 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>200 200 0.1</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>50</mu2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>0 0 0 0 -0 0</pose>
+    </model>
+
+     <model name='tam_yol_seritli'>
+      <static>1</static>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://tam_yol_seritli/meshes/tam_yol_seritli.dae</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>100 -12.700000 -0.100000 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>200 200 0.1</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>50</mu2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>0 -12.700000 -0.100000 0 -0 0</pose>
+    </model>
+
+     <model name='tam_yol_arkaplan'>
+      <static>1</static>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://tam_yol_arkaplan/meshes/tam_yol_arkaplan.dae</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>-33.400000 -1.000000 -14.800000 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>200 200 0.1</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>50</mu2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>-33.400000 -1.000000 -14.800000 0 -0 0</pose>
+    </model>
+
+
+   
+
+
+
+    <model name='park_yeri_1'>
+      <static>1</static>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://park_yeri/meshes/park_yeri.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>4 2 0.01</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>12.085 -19.4629 0 0 -0 0</pose>
+
+    </model>
+    <model name='park_yeri_2'>
+      <static>1</static>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://park_yeri/meshes/park_yeri.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>4 2 0.01</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>17.2651 -16.2629 0 0 -0 0</pose>
+    </model>
+
+    <model name='park_yeri_3'>
+      <static>1</static>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://park_yeri/meshes/park_yeri.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>4 2 0.01</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>17.2651 -22.6629 0 0 -0 0</pose>
+    </model>
+    
+
+
+    <model name='sari_cizgi_son'>
+      <static>1</static>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://sari_cizgi/meshes/sari_cizgi.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>1 1 0.01</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>188.691 -19.4629 0 0 -0 0</pose>
+
+
+
+    </model>
+    <model name='turuncu_cizgi_1'>
+      <static>1</static>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://turuncu_cizgi/meshes/turuncu_cizgi.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>0.149994 11.4 0.01</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>65.8881 -20.7877 0 0 -0 0</pose>
+    </model>
+
+    <model name='turuncu_cizgi_2'>
+      <static>1</static>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://turuncu_cizgi/meshes/turuncu_cizgi.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>0.149994 11.4 0.01</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>140.9 -20.8455 0 0 -0 0</pose>
+    </model>
+
+
+
+    <model name='sari_duba_1'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <mass>10</mass>
+          <inertia>
+            <ixx>1</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>1</iyy>
+            <iyz>0</iyz>
+            <izz>1</izz>
+          </inertia>
+          <pose>0 0 0 0 -0 0</pose>
+        </inertial>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://sari_duba/meshes/sari_duba.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 3.14 0.15 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.305265 6.29114 0.305265</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>0.15264 -15.1039 0.01 0 -0 0</pose>
+    </model>
+
+    <model name='sari_duba_2'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <mass>10</mass>
+          <inertia>
+            <ixx>1</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>1</iyy>
+            <iyz>0</iyz>
+            <izz>1</izz>
+          </inertia>
+          <pose>0 0 0 0 -0 0</pose>
+        </inertial>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://sari_duba/meshes/sari_duba.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 3.14 0.15 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.305265 6.29114 0.305265</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>0.15264 -23.6757 0 0 -0 0</pose>
+    </model>
+
+    <model name='sari_duba_3'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <mass>10</mass>
+          <inertia>
+            <ixx>1</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>1</iyy>
+            <iyz>0</iyz>
+            <izz>1</izz>
+          </inertia>
+          <pose>0 0 0 0 -0 0</pose>
+        </inertial>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://sari_duba/meshes/sari_duba.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 3.14 0.15 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.305265 6.29114 0.305265</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>65.8375 -13.2673 0 0 0 0</pose>
+    </model>
+
+
+    <model name='sari_duba_4'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <mass>10</mass>
+          <inertia>
+            <ixx>1</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>1</iyy>
+            <iyz>0</iyz>
+            <izz>1</izz>
+          </inertia>
+          <pose>0 0 0 0 -0 0</pose>
+        </inertial>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://sari_duba/meshes/sari_duba.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 3.14 0.15 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.305265 6.29114 0.305265</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>140.871 -13.2673 0.01 0 -0 0</pose>
+    </model>
+
+
+    
+    <model name='gri_kutu_1'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0.5 0 -0 0</pose>
+          <mass>50</mass>
+          <inertia>
+            <ixx>8.33</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>10.16</iyy>
+            <iyz>0</iyz>
+            <izz>10.16</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://gri_engel/meshes/gri_engel.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0.5 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.2 1 1</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>100</mu2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>11.0855 -19.4376 0 0 -0 0</pose>
+    </model>
+
+    <model name='gri_kutu_2'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0.5 0 -0 0</pose>
+          <mass>50</mass>
+          <inertia>
+            <ixx>8.33</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>10.16</iyy>
+            <iyz>0</iyz>
+            <izz>10.16</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://gri_engel/meshes/gri_engel.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0.5 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.2 1 1</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>100</mu2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>16.3251 -16.2803 0 0 -0 0</pose>
+    </model>
+
+    <model name='gri_kutu_3'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0.5 0 -0 0</pose>
+          <mass>50</mass>
+          <inertia>
+            <ixx>8.33</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>10.16</iyy>
+            <iyz>0</iyz>
+            <izz>10.16</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://gri_engel/meshes/gri_engel.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0.5 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.2 1 1</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>100</mu2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>16.3251 -22.6438 0 0 -0 0</pose>
+    </model>
+
+
+    <model name='levha_1'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.05</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.05</iyy>
+            <iyz>0</iyz>
+            <izz>0.05</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 -0.425 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://dur_levhasi/meshes/dur_levhasi.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.180564 0.316564 0.849001</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>65.8922 -26.6093 0.010393 0 -0 0</pose>
+    </model>
+
+    <model name='levha_2'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.05</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.05</iyy>
+            <iyz>0</iyz>
+            <izz>0.05</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://dur_levhasi/meshes/dur_levhasi.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.180564 0.316564 0.849001</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>65.8811 -14.9709 0.000393 0 -0 0</pose>
+    </model>
+
+    <model name='levha_3'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.05</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.05</iyy>
+            <iyz>0</iyz>
+            <izz>0.05</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 -0.425 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://dur_levhasi/meshes/dur_levhasi.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.180564 0.316564 0.849001</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>140.89 -26.6093 0.01 0 -0 0</pose>
+    </model>
+
+    <model name='levha_4'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.05</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.05</iyy>
+            <iyz>0</iyz>
+            <izz>0.05</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 -0.425 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://dur_levhasi/meshes/dur_levhasi.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.180564 0.316564 0.849001</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>140.904 -15.0797 0 0 -0 0</pose>
+
+
+
+    </model>
+    <model name='mavi_duba_1'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.5</mass>
+          <inertia>
+            <ixx>0.05</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.05</iyy>
+            <iyz>0</iyz>
+            <izz>0.05</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 -0.55 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://mavi_duba/meshes/mavi_duba.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.493994 0.493994 1.1</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>77.0419 -23.1467 0 0 0 0</pose>
+
+    </model>
+    <model name='mavi_duba_2'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.5</mass>
+          <inertia>
+            <ixx>0.05</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.05</iyy>
+            <iyz>0</iyz>
+            <izz>0.05</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 -0.55 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://mavi_duba/meshes/mavi_duba.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.493994 0.493994 1.1</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>77.0419 -21.701 0 0 0 0</pose>
+    </model>
+
+    <model name='mavi_duba_3'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.5</mass>
+          <inertia>
+            <ixx>0.05</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.05</iyy>
+            <iyz>0</iyz>
+            <izz>0.05</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 -0.55 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://mavi_duba/meshes/mavi_duba.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.493994 0.493994 1.1</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>86.5461 -17.4623 0 0 0 0</pose>
+    </model>
+
+    <model name='mavi_duba_4'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.5</mass>
+          <inertia>
+            <ixx>0.05</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.05</iyy>
+            <iyz>0</iyz>
+            <izz>0.05</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 -0.55 0 0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://mavi_duba/meshes/mavi_duba.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.493994 0.493994 1.1</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>86.5461 -16.0165 0 0 -0 0</pose>
+    </model>
+
+    <model name='mavi_duba_5'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>0.5</mass>
+          <inertia>
+            <ixx>0.05</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.05</iyy>
+            <iyz>0</iyz>
+            <izz>0.05</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 -0.55 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://mavi_duba/meshes/mavi_duba.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.493994 0.493994 1.1</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>97.899 -23.1467 0 0 -0 0</pose>
+    </model>
+
+    <model name='mavi_duba_6'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.5</mass>
+          <inertia>
+            <ixx>0.05</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.05</iyy>
+            <iyz>0</iyz>
+            <izz>0.05</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 -0.55 0 0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://mavi_duba/meshes/mavi_duba.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.493994 0.493994 1.1</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>97.899 -21.701 0 0 -0 0</pose>
+    </model>
+
+    <model name='mavi_duba_7'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.5</mass>
+          <inertia>
+            <ixx>0.05</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.05</iyy>
+            <iyz>0</iyz>
+            <izz>0.05</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 -0.55 0 0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://mavi_duba/meshes/mavi_duba.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.493994 0.493994 1.1</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>107.403 -17.4623 0 0 -0 0</pose>
+    </model>
+    <model name='mavi_duba_8'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.5</mass>
+          <inertia>
+            <ixx>0.05</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.05</iyy>
+            <iyz>0</iyz>
+            <izz>0.05</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 -0.55 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://mavi_duba/meshes/mavi_duba.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.493994 0.493994 1.1</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>107.403 -16.0165 0 0 -0 0</pose>
+    </model>
+    <model name='mavi_duba_9'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.5</mass>
+          <inertia>
+            <ixx>0.05</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.05</iyy>
+            <iyz>0</iyz>
+            <izz>0.05</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 -0.55 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://mavi_duba/meshes/mavi_duba.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.493994 0.493994 1.1</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>117.758 -23.1467 0 0 -0 0</pose>
+    </model>
+    <model name='mavi_duba_10'>
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.5</mass>
+          <inertia>
+            <ixx>0.05</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.05</iyy>
+            <iyz>0</iyz>
+            <izz>0.05</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <pose>0 0 -0.55 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://mavi_duba/meshes/mavi_duba.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.493994 0.493994 1.1</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>117.758 -21.701 0 0 -0 0</pose>
+    </model>
+    <gravity>0 0 -9.8</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    <atmosphere type='adiabatic'/>
+    <physics type='ode'>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>1</shadows>
+    </scene>
+    <audio>
+      <device>default</device>
+    </audio>
+    <wind/>
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>0</latitude_deg>
+      <longitude_deg>0</longitude_deg>
+      <elevation>0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+    <state world_name='parkour_world'>
+      <sim_time>87 440000000</sim_time>
+      <real_time>90 426879531</real_time>
+      <wall_time>1765991842 887129259</wall_time>
+      <iterations>87440</iterations>
+      <model name='gri_kutu_1'>
+        <pose>11.0855 -19.4376 0.004996 -7e-06 -0 -0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>11.0855 -19.4376 0.004996 -7e-06 -0 -0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0.001227 3.68061 -3.66783 -1.07444 0.002379 0.002002</acceleration>
+          <wrench>0.061335 184.03 -183.392 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='gri_kutu_2'>
+        <pose>16.3251 -16.2803 0.004996 -7e-06 -0 -0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>16.3251 -16.2803 0.004996 -7e-06 -0 -0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0.001227 3.68061 -3.66783 -1.07444 0.002379 0.002002</acceleration>
+          <wrench>0.061335 184.03 -183.392 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='gri_kutu_3'>
+        <pose>16.3251 -22.6438 0.004996 -7e-06 -0 -0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>16.3251 -22.6438 0.004996 -7e-06 -0 -0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0.001227 3.68061 -3.66783 -1.07444 0.002379 0.002002</acceleration>
+          <wrench>0.061335 184.03 -183.392 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='levha_1'>
+        <pose>65.9408 -26.8142 0.424501 2e-06 -3e-06 -6.4e-05</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>65.9408 -26.8142 0.424501 2e-06 -3e-06 -6.4e-05</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>2.05635 3.83201 3.13818 -2.13859 -0.377786 -0.410521</acceleration>
+          <wrench>2.05635 3.83201 3.13818 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='levha_2'>
+        <pose>65.8653 -14.9474 0.427165 -0.017121 -0.000168 -0.013365</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>65.8653 -14.9474 0.427165 -0.017121 -0.000168 -0.013365</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>-2.17631 3.42273 3.36313 -1.76239 1.36398 -0.051096</acceleration>
+          <wrench>-2.17631 3.42273 3.36313 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='levha_3'>
+        <pose>140.937 -26.8554 0.424501 -2e-06 4e-06 0.017838</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>140.937 -26.8554 0.424501 -2e-06 4e-06 0.017838</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>-1.97573 -3.88004 3.1524 2.18793 0.40531 -0.468623</acceleration>
+          <wrench>-1.97573 -3.88004 3.1524 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='levha_4'>
+        <pose>140.906 -15.0108 0.42721 -0.017516 -3e-05 -0.006758</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>140.906 -15.0108 0.42721 -0.017516 -3e-05 -0.006758</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>1.41852 -2.40679 -1.14947 2.49214 -0.17882 3.14159</acceleration>
+          <wrench>1.41852 -2.40679 -1.14947 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='mavi_duba_1'>
+        <pose>77.042 -23.1468 0.55 1e-06 -1e-06 0.000106</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>77.042 -23.1468 0.55 1e-06 -1e-06 0.000106</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>4.85841 4.40515 4.53618 1.0974 0.739956 3.10701</acceleration>
+          <wrench>2.42921 2.20257 2.26809 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='mavi_duba_10'>
+        <pose>117.758 -21.7011 0.549997 6e-06 -5e-06 6.3e-05</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>117.758 -21.7011 0.549997 6e-06 -5e-06 6.3e-05</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>-1.62442 -1.63137 -5.00934 -0.280631 -0.243905 3.12494</acceleration>
+          <wrench>-0.812212 -0.815685 -2.50467 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='mavi_duba_2'>
+        <pose>77.042 -21.701 0.550001 1e-06 -2e-06 0.000101</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>77.042 -21.701 0.550001 1e-06 -2e-06 0.000101</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>5.04123 4.28727 5.16045 1.51493 0.203396 2.65202</acceleration>
+          <wrench>2.52062 2.14363 2.58023 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='mavi_duba_3'>
+        <pose>86.5462 -17.4624 0.549998 3e-06 -5e-06 9.4e-05</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>86.5462 -17.4624 0.549998 3e-06 -5e-06 9.4e-05</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>-1.3062 -1.30831 -5.94745 -0.820765 -0.81094 3.13699</acceleration>
+          <wrench>-0.6531 -0.654153 -2.97372 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='mavi_duba_4'>
+        <pose>86.5462 -16.0166 0.550001 1e-06 -2e-06 0.000111</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>86.5462 -16.0166 0.550001 1e-06 -2e-06 0.000111</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>5.15452 4.27245 5.49921 1.55249 -0.009851 2.64309</acceleration>
+          <wrench>2.57726 2.13622 2.7496 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='mavi_duba_5'>
+        <pose>97.8991 -23.1468 0.549998 -2e-06 5e-06 1.4e-05</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>97.8991 -23.1468 0.549998 -2e-06 5e-06 1.4e-05</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>1.28535 1.29546 -6.02086 0.93223 0.876824 3.11669</acceleration>
+          <wrench>0.642675 0.647731 -3.01043 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='mavi_duba_6'>
+        <pose>97.8991 -21.701 0.55 -0 -1e-06 0.000124</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>97.8991 -21.701 0.55 -0 -1e-06 0.000124</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>4.87084 4.62806 4.5721 0.706005 0.720336 -3.13514</acceleration>
+          <wrench>2.43542 2.31403 2.28605 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='mavi_duba_7'>
+        <pose>107.403 -17.4623 0.550001 -1e-06 2e-06 3.4e-05</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>107.403 -17.4623 0.550001 -1e-06 2e-06 3.4e-05</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>-5.0087 -3.8723 5.09175 -2.35164 -0.191964 2.51865</acceleration>
+          <wrench>-2.50435 -1.93615 2.54587 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='mavi_duba_8'>
+        <pose>107.403 -16.0165 0.549998 -2e-06 6e-06 8.4e-05</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>107.403 -16.0165 0.549998 -2e-06 6e-06 8.4e-05</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>1.31397 1.3244 -5.93621 0.88163 0.825846 3.11637</acceleration>
+          <wrench>0.656988 0.6622 -2.96811 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='mavi_duba_9'>
+        <pose>117.758 -23.1467 0.549998 3e-06 -5e-06 7.5e-05</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>117.758 -23.1467 0.549998 3e-06 -5e-06 7.5e-05</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>-1.32835 -1.33993 -5.89721 -0.870782 -0.808525 3.11348</acceleration>
+          <wrench>-0.664177 -0.669965 -2.94861 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='park_yeri_1'>
+        <pose>12.085 -19.4629 0 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>12.085 -19.4629 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='park_yeri_2'>
+        <pose>17.2651 -16.2629 0 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>17.2651 -16.2629 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='park_yeri_3'>
+        <pose>17.2651 -22.6629 0 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>17.2651 -22.6629 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='sari_cizgi_son'>
+        <pose>188.691 -19.4629 0 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>188.691 -19.4629 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='sari_duba_1'>
+        <pose>0.15264 -15.1039 0.002632 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>0.15264 -15.1039 0.002632 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 -0 -0 0 -0 0</acceleration>
+          <wrench>0 -0 -0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='sari_duba_2'>
+        <pose>0.15264 -23.6757 0.002632 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>0.15264 -23.6757 0.002632 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 -0 -0 0 -0 0</acceleration>
+          <wrench>0 -0 -0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='sari_duba_3'>
+        <pose>65.8375 -11.6424 0.002632 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>65.8375 -11.6424 0.002632 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>-0 0 0 0 -0 0</acceleration>
+          <wrench>-0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='sari_duba_4'>
+        <pose>140.871 -11.7465 0.002632 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>140.871 -11.7465 0.002632 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 -0 0 0 -0 0</acceleration>
+          <wrench>0 -0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='turuncu_cizgi_1'>
+        <pose>65.8881 -20.7877 0 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>65.8881 -20.7877 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+
+ 
+      <model name='turuncu_cizgi_2'>
+        <pose>140.9 -20.8455 1e-06 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>140.9 -20.8455 1e-06 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='yol'>
+        <pose>0 0 0 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>0 0 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <light name='sun'>
+        <pose>0 0 10 0 -0 0</pose>
+      </light>
+    </state>
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>185.58 -37.5447 20.572 -0 0.703643 1.7554</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>perspective</projection_type>
+      </camera>
+    </gui>
+  </world>
+</sdf>

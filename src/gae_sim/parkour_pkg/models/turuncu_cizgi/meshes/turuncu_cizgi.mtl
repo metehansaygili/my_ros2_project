@@ -1,0 +1,11 @@
+# Blender MTL File
+# Kirmizi 2 - Canli
+newmtl Material.012
+Ns 0.000000
+Ka 0.900 0.000 0.000
+Kd 0.900 0.000 0.000
+Ks 0.000 0.000 0.000
+Ke 0.100 0.000 0.000
+Ni 1.000000
+d 1.000000
+illum 1
