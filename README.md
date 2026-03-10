@@ -74,3 +74,13 @@ colcon build --symlink-install --continue-on-error
 
 ### Source the environment
 source install/setup.bash
+
+### References & Acknowledgements
+
+This project utilizes several open-source frameworks and templates:
+
+    ROS 2 (Robot Operating System 2): The core middleware used for robot communication and task management.
+
+    Autoware Foundation: Various packages and message types are derived from the Autoware.Universe and Tier4 autonomous driving stacks.
+
+    LCAS ROS 2 Template: The Docker and Dev Container configuration is based on the LCAS (Lincoln Centre for Autonomous Systems) ROS 2 package template.
