@@ -65,12 +65,12 @@ The workspace is organized into modular packages within the src/ directory:
 Once inside the container terminal, follow these steps to compile the workspace:
 Bash
 
-# Update and install dependencies
+### Update and install dependencies
 rosdep update
 rosdep install --from-paths src --ignore-src -y -r
 
-# Build the workspace
+### Build the workspace
 colcon build --symlink-install --continue-on-error
 
-# Source the environment
+### Source the environment
 source install/setup.bash
